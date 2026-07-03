@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from fastapi import FastAPI, Depends, HTTPException, Response, BackgroundTasks
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -75,6 +77,16 @@ def reject(source_id: int, db: Session = Depends(get_db)):
     src.status = "rejected"
     db.commit()
     return source_to_dict(src)
+
+@app.get("/review/due")
+def due_cards(db: Session = Depends(get_db)):
+    now = datetime.now(timezone.utc)
+    cards = db.scalars(select(Card).where(Card.suspended == False,  # noqa: E712
+                                          Card.due_at != None,       # noqa: E711
+                                          Card.due_at <= now)
+                       .order_by(Card.due_at)).all()
+    return [{"id": c.id, "question": c.question, "source_title": c.source.title,
+             "due_at": c.due_at.isoformat()} for c in cards]
 
 @app.get("/profile")
 def read_profile(db: Session = Depends(get_db)):
