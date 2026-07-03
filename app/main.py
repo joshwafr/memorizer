@@ -1,9 +1,10 @@
-from fastapi import FastAPI, Depends, Response, BackgroundTasks
+from fastapi import FastAPI, Depends, HTTPException, Response, BackgroundTasks
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app import fsrs_service
 from app.db import init_db, get_db
-from app.models import Source, InterestProfile
+from app.models import Source, Card, InterestProfile
 from app.capture import detect_source_type
 from app.pipeline import process_source, get_profile
 from app.schemas import CaptureRequest, ProfileUpdate
@@ -48,6 +49,31 @@ def capture(req: CaptureRequest, response: Response, background_tasks: Backgroun
     background_tasks.add_task(process_source, src.id, app.state.session_factory,
                               app.state.llm, app.state.fetcher)
     response.status_code = 201
+    return source_to_dict(src)
+
+@app.get("/inbox")
+def inbox(db: Session = Depends(get_db)):
+    sources = db.scalars(select(Source).where(Source.status == "inbox")).all()
+    return [source_to_dict(s) for s in sources]
+
+@app.post("/sources/{source_id}/approve")
+def approve(source_id: int, db: Session = Depends(get_db)):
+    src = db.get(Source, source_id)
+    if not src or src.status != "inbox":
+        raise HTTPException(404, "No inbox source with that id")
+    for card in src.cards:
+        card.fsrs_state, card.due_at = fsrs_service.new_card_state()
+    src.status = "approved"
+    db.commit()
+    return source_to_dict(src)
+
+@app.post("/sources/{source_id}/reject")
+def reject(source_id: int, db: Session = Depends(get_db)):
+    src = db.get(Source, source_id)
+    if not src or src.status != "inbox":
+        raise HTTPException(404, "No inbox source with that id")
+    src.status = "rejected"
+    db.commit()
     return source_to_dict(src)
 
 @app.get("/profile")
