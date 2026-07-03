@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
+from pathlib import Path
 
 from fastapi import FastAPI, Depends, HTTPException, Response, BackgroundTasks
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -12,6 +14,8 @@ from app.pipeline import process_source, get_profile
 from app.schemas import CaptureRequest, AnswerRequest, ProfileUpdate
 
 app = FastAPI(title="Memorizer")
+
+app.mount("/ui", StaticFiles(directory=Path(__file__).parent / "static", html=True), name="ui")
 
 @app.on_event("startup")
 def _startup():

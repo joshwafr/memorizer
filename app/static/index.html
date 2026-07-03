@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Memorizer</title>
+<style>
+  body { font-family: sans-serif; max-width: 700px; margin: 1em auto; padding: 0 1em; }
+  section { border: 1px solid #999; padding: 1em; margin-bottom: 1em; }
+  h2 { margin-top: 0; }
+  .card { background: #f4f4f4; padding: 0.5em; margin: 0.5em 0; }
+  .muted { color: #666; font-size: 0.9em; }
+  textarea { width: 100%; box-sizing: border-box; }
+  button { margin-right: 0.5em; }
+  .error { color: #b00; }
+</style>
+</head>
+<body>
+<h1>Memorizer</h1>
+
+<section id="capture-section">
+  <h2>Capture</h2>
+  <form id="capture-form">
+    <input type="url" id="capture-url" placeholder="https://..." size="50" required>
+    <button type="submit">Capture</button>
+  </form>
+  <p id="capture-status" class="muted"></p>
+</section>
+
+<section id="inbox-section">
+  <h2>Inbox <button id="inbox-refresh">Refresh</button></h2>
+  <div id="inbox-list"></div>
+</section>
+
+<section id="review-section">
+  <h2>Review <span id="due-count" class="muted"></span> <button id="review-refresh">Refresh</button></h2>
+  <div id="review-area"></div>
+</section>
+
+<script>
+async function api(path, opts = {}) {
+  opts.headers = Object.assign({}, opts.headers);
+  const token = localStorage.getItem("memorizer_token");
+  if (token) opts.headers["Authorization"] = "Bearer " + token;
+  let r = await fetch(path, opts);
+  if (r.status === 401) {
+    const entered = prompt("API token required:");
+    if (entered) {
+      localStorage.setItem("memorizer_token", entered);
+      opts.headers["Authorization"] = "Bearer " + entered;
+      r = await fetch(path, opts);
+    }
+  }
+  return r;
+}
+
+function esc(s) {
+  const d = document.createElement("div");
+  d.textContent = s == null ? "" : String(s);
+  return d.innerHTML;
+}
+
+// --- Capture ---
+document.getElementById("capture-form").onsubmit = async (e) => {
+  e.preventDefault();
+  const status = document.getElementById("capture-status");
+  status.textContent = "Capturing...";
+  const r = await api("/capture", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ url: document.getElementById("capture-url").value }),
+  });
+  const body = await r.json();
+  status.textContent = r.ok
+    ? `Captured #${body.id} (${body.status}). Processing runs in the background — refresh the inbox shortly.`
+    : "Error: " + JSON.stringify(body);
+  if (r.ok) document.getElementById("capture-url").value = "";
+};
+
+// --- Inbox ---
+async function loadInbox() {
+  const list = document.getElementById("inbox-list");
+  const r = await api("/inbox");
+  if (!r.ok) { list.innerHTML = '<p class="error">Failed to load inbox.</p>'; return; }
+  const sources = await r.json();
+  if (!sources.length) { list.innerHTML = '<p class="muted">Inbox empty.</p>'; return; }
+  list.innerHTML = sources.map(s => `
+    <div class="source" data-id="${s.id}">
+      <strong>${esc(s.title || s.url)}</strong>
+      <p class="muted">${esc(s.triage_reason || "")}</p>
+      ${s.cards.map(c => `<div class="card"><b>Q:</b> ${esc(c.question)}<br><b>A:</b> ${esc(c.answer)}</div>`).join("")}
+      <button data-action="approve">Approve</button>
+      <button data-action="reject">Reject</button>
+    </div>`).join("<hr>");
+}
+document.getElementById("inbox-list").onclick = async (e) => {
+  const action = e.target.dataset.action;
+  if (!action) return;
+  const id = e.target.closest(".source").dataset.id;
+  await api(`/sources/${id}/${action}`, { method: "POST" });
+  loadInbox();
+  loadReview();
+};
+document.getElementById("inbox-refresh").onclick = loadInbox;
+
+// --- Review loop ---
+let queue = [], idx = 0;
+
+async function loadReview() {
+  const r = await api("/review/due");
+  if (!r.ok) {
+    document.getElementById("review-area").innerHTML = '<p class="error">Failed to load due cards.</p>';
+    return;
+  }
+  queue = await r.json();
+  idx = 0;
+  showQuestion();
+}
+
+function showQuestion() {
+  const area = document.getElementById("review-area");
+  document.getElementById("due-count").textContent = `(${queue.length - idx} due)`;
+  if (idx >= queue.length) { area.innerHTML = '<p class="muted">No cards due.</p>'; return; }
+  const card = queue[idx];
+  area.innerHTML = `
+    <p class="muted">${esc(card.source_title || "")}</p>
+    <p><b>${esc(card.question)}</b></p>
+    <textarea id="answer-input" rows="4" placeholder="Type your answer"></textarea><br>
+    <button id="answer-submit">Submit</button>`;
+  document.getElementById("answer-submit").onclick = () => submitAnswer(card.id);
+}
+
+async function submitAnswer(cardId) {
+  const area = document.getElementById("review-area");
+  const answer = document.getElementById("answer-input").value;
+  document.getElementById("answer-submit").disabled = true;
+  const r = await api(`/review/${cardId}/answer`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ answer }),
+  });
+  const body = await r.json();
+  if (!r.ok) {
+    area.innerHTML += `<p class="error">Error: ${esc(JSON.stringify(body))}</p>`;
+    return;
+  }
+  area.innerHTML = `
+    <p><b>Grade:</b> ${esc(body.grade)}</p>
+    <p><b>Feedback:</b> ${esc(body.feedback)}</p>
+    <p><b>Correct answer:</b> ${esc(body.correct_answer)}</p>
+    <p class="muted">Next due: ${esc(body.next_due)}</p>
+    <button id="next-btn">Next</button>`;
+  document.getElementById("next-btn").onclick = () => { idx++; showQuestion(); };
+}
+document.getElementById("review-refresh").onclick = loadReview;
+
+loadInbox();
+loadReview();
+</script>
+</body>
+</html>
