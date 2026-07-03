@@ -91,15 +91,18 @@ def due_cards(db: Session = Depends(get_db)):
 @app.post("/review/{card_id}/answer")
 def answer_card(card_id: int, req: AnswerRequest, db: Session = Depends(get_db)):
     card = db.get(Card, card_id)
-    if not card or card.fsrs_state is None:
+    if not card or card.fsrs_state is None or card.suspended:
         raise HTTPException(404, "No reviewable card with that id")
     result = app.state.llm.grade(card.question, card.answer, card.key_points, req.answer)
-    grade = result["grade"]
+    grade = str(result.get("grade", "")).strip().lower()
+    if grade not in fsrs_service.RATINGS:
+        raise HTTPException(502, "LLM returned an invalid grade")
+    feedback = result.get("feedback", "")
     card.fsrs_state, card.due_at = fsrs_service.review(card.fsrs_state, grade)
     db.add(Review(card_id=card.id, grade=grade, mode="text",
-                  user_answer=req.answer, feedback=result["feedback"]))
+                  user_answer=req.answer, feedback=feedback))
     db.commit()
-    return {"grade": grade, "feedback": result["feedback"],
+    return {"grade": grade, "feedback": feedback,
             "correct_answer": card.answer, "next_due": card.due_at.isoformat()}
 
 @app.get("/profile")
