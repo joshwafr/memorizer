@@ -6,10 +6,10 @@ from sqlalchemy.orm import Session
 
 from app import fsrs_service
 from app.db import init_db, get_db
-from app.models import Source, Card, InterestProfile
+from app.models import Source, Card, Review, InterestProfile
 from app.capture import detect_source_type
 from app.pipeline import process_source, get_profile
-from app.schemas import CaptureRequest, ProfileUpdate
+from app.schemas import CaptureRequest, AnswerRequest, ProfileUpdate
 
 app = FastAPI(title="Memorizer")
 
@@ -87,6 +87,20 @@ def due_cards(db: Session = Depends(get_db)):
                        .order_by(Card.due_at)).all()
     return [{"id": c.id, "question": c.question, "source_title": c.source.title,
              "due_at": c.due_at.isoformat()} for c in cards]
+
+@app.post("/review/{card_id}/answer")
+def answer_card(card_id: int, req: AnswerRequest, db: Session = Depends(get_db)):
+    card = db.get(Card, card_id)
+    if not card or card.fsrs_state is None:
+        raise HTTPException(404, "No reviewable card with that id")
+    result = app.state.llm.grade(card.question, card.answer, card.key_points, req.answer)
+    grade = result["grade"]
+    card.fsrs_state, card.due_at = fsrs_service.review(card.fsrs_state, grade)
+    db.add(Review(card_id=card.id, grade=grade, mode="text",
+                  user_answer=req.answer, feedback=result["feedback"]))
+    db.commit()
+    return {"grade": grade, "feedback": result["feedback"],
+            "correct_answer": card.answer, "next_due": card.due_at.isoformat()}
 
 @app.get("/profile")
 def read_profile(db: Session = Depends(get_db)):

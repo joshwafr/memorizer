@@ -19,3 +19,22 @@ def test_suspended_cards_excluded(client, db):
     src.cards[0].suspended = True
     db.commit()
     assert len(client.get("/review/due").json()) == 1
+
+from app.models import Review
+
+def test_answer_grades_and_reschedules(client, db):
+    _approved_source(client, db)
+    card_id = client.get("/review/due").json()[0]["id"]
+    r = client.post(f"/review/{card_id}/answer", json={"answer": "my spoken answer"})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["grade"] == "good"
+    assert "feedback" in body and "next_due" in body
+    assert db.query(Review).count() == 1
+
+def test_good_grade_pushes_due_to_future(client, db):
+    _approved_source(client, db)
+    card_id = client.get("/review/due").json()[0]["id"]
+    client.post(f"/review/{card_id}/answer", json={"answer": "x"})
+    remaining = [c["id"] for c in client.get("/review/due").json()]
+    assert card_id not in remaining
