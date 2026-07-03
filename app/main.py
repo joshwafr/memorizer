@@ -3,10 +3,10 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db import init_db, get_db
-from app.models import Source
+from app.models import Source, InterestProfile
 from app.capture import detect_source_type
-from app.pipeline import process_source
-from app.schemas import CaptureRequest
+from app.pipeline import process_source, get_profile
+from app.schemas import CaptureRequest, ProfileUpdate
 
 app = FastAPI(title="Memorizer")
 
@@ -45,3 +45,16 @@ def capture(req: CaptureRequest, response: Response, background_tasks: Backgroun
     background_tasks.add_task(process_source, src.id, db, app.state.llm, app.state.fetcher)
     response.status_code = 201
     return source_to_dict(src)
+
+@app.get("/profile")
+def read_profile(db: Session = Depends(get_db)):
+    p = get_profile(db)
+    return {"text": p.text, "version": p.version}
+
+@app.put("/profile")
+def update_profile(req: ProfileUpdate, db: Session = Depends(get_db)):
+    current = get_profile(db)
+    p = InterestProfile(text=req.text, version=current.version + 1)
+    db.add(p)
+    db.commit()
+    return {"text": p.text, "version": p.version}
