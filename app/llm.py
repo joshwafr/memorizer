@@ -8,7 +8,10 @@ MODEL = os.environ.get("MEMORIZER_MODEL", "claude-sonnet-4-6")
 def extract_json(text: str):
     match = re.search(r"```(?:json)?\s*(.*?)```", text, re.DOTALL)
     payload = match.group(1) if match else text
-    start = payload.find("{") if "{" in payload else payload.find("[")
+    starts = [i for i in (payload.find("{"), payload.find("[")) if i != -1]
+    if not starts:
+        raise ValueError(f"no JSON object or array found in LLM response: {text[:200]!r}")
+    start = min(starts)
     end = max(payload.rfind("}"), payload.rfind("]")) + 1
     return json.loads(payload[start:end])
 
@@ -36,8 +39,12 @@ class ClaudeLLM:
         self.client = Anthropic()  # reads ANTHROPIC_API_KEY
 
     def _ask(self, prompt: str):
-        resp = self.client.messages.create(model=MODEL, max_tokens=2000,
+        resp = self.client.messages.create(model=MODEL, max_tokens=4000,
                                            messages=[{"role": "user", "content": prompt}])
+        if resp.stop_reason == "max_tokens":
+            raise RuntimeError(
+                f"LLM response was truncated at the max_tokens limit (4000); "
+                f"cannot parse a complete JSON response for model {MODEL}")
         return extract_json(resp.content[0].text)
 
     def triage(self, title: str | None, content: str, profile: str) -> dict:

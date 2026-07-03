@@ -21,6 +21,9 @@ def _services():
         from app.fetchers import ContentFetcher
         app.state.llm = ClaudeLLM()
         app.state.fetcher = ContentFetcher()
+    if not hasattr(app.state, "session_factory"):
+        from app.db import SessionLocal
+        app.state.session_factory = SessionLocal
 
 @app.get("/health")
 def health():
@@ -42,7 +45,8 @@ def capture(req: CaptureRequest, response: Response, background_tasks: Backgroun
     src = Source(url=req.url, source_type=detect_source_type(req.url), status="pending")
     db.add(src)
     db.commit()
-    background_tasks.add_task(process_source, src.id, db, app.state.llm, app.state.fetcher)
+    background_tasks.add_task(process_source, src.id, app.state.session_factory,
+                              app.state.llm, app.state.fetcher)
     response.status_code = 201
     return source_to_dict(src)
 

@@ -46,5 +46,6 @@ def client(engine, db, fake_llm):
     app.dependency_overrides[get_db] = override_get_db
     app.state.llm = fake_llm
     app.state.fetcher = FakeFetcher()
+    app.state.session_factory = sessionmaker(bind=engine)
     yield TestClient(app)
     app.dependency_overrides.clear()
