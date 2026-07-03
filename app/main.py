@@ -1,10 +1,11 @@
+import logging
 import os
 import secrets
 from datetime import datetime, timezone
 from pathlib import Path
 
 from fastapi import FastAPI, Depends, HTTPException, Request, Response, BackgroundTasks
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -16,6 +17,8 @@ from app.capture import detect_source_type
 from app.pipeline import process_source, get_profile
 from app.schemas import CaptureRequest, AnswerRequest, ProfileUpdate
 
+logger = logging.getLogger(__name__)
+
 app = FastAPI(title="Memorizer")
 
 app.mount("/ui", StaticFiles(directory=Path(__file__).parent / "static", html=True), name="ui")
@@ -25,7 +28,7 @@ async def require_bearer_token(request: Request, call_next):
     token = os.environ.get("MEMORIZER_TOKEN")  # read at request time, not import time
     if token:
         path = request.url.path
-        if path != "/health" and not (path == "/ui" or path.startswith("/ui/")):
+        if path not in ("/", "/health") and not (path == "/ui" or path.startswith("/ui/")):
             provided = request.headers.get("authorization", "")
             expected = f"Bearer {token}"
             if not secrets.compare_digest(provided.encode(), expected.encode()):
@@ -41,11 +44,19 @@ def _services():
     if not hasattr(app.state, "llm"):
         from app.llm import ClaudeLLM
         from app.fetchers import ContentFetcher
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            logger.warning("=" * 60)
+            logger.warning("ANTHROPIC_API_KEY not set — captures and reviews will fail")
+            logger.warning("=" * 60)
         app.state.llm = ClaudeLLM()
         app.state.fetcher = ContentFetcher()
     if not hasattr(app.state, "session_factory"):
         from app.db import SessionLocal
         app.state.session_factory = SessionLocal
+
+@app.get("/")
+def root():
+    return RedirectResponse("/ui/")
 
 @app.get("/health")
 def health():
@@ -63,6 +74,9 @@ def capture(req: CaptureRequest, response: Response, background_tasks: Backgroun
             db: Session = Depends(get_db)):
     existing = db.scalar(select(Source).where(Source.url == req.url))
     if existing:
+        if existing.status in ("pending", "failed"):
+            background_tasks.add_task(process_source, existing.id, app.state.session_factory,
+                                      app.state.llm, app.state.fetcher)
         return source_to_dict(existing)
     src = Source(url=req.url, source_type=detect_source_type(req.url), status="pending")
     db.add(src)
@@ -116,7 +130,7 @@ def answer_card(card_id: int, req: AnswerRequest, db: Session = Depends(get_db))
     grade = str(result.get("grade", "")).strip().lower()
     if grade not in fsrs_service.RATINGS:
         raise HTTPException(502, "LLM returned an invalid grade")
-    feedback = result.get("feedback", "")
+    feedback = result.get("feedback") or ""
     card.fsrs_state, card.due_at = fsrs_service.review(card.fsrs_state, grade)
     db.add(Review(card_id=card.id, grade=grade, mode="text",
                   user_answer=req.answer, feedback=feedback))

@@ -4,6 +4,9 @@ from sqlalchemy import create_engine, DateTime, TypeDecorator
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///memorizer.db")
+# Heroku/Railway-style URLs use the deprecated postgres:// scheme; SQLAlchemy needs postgresql://
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 class UTCDateTime(TypeDecorator):
     """DateTime that stores UTC and always returns timezone-aware values.

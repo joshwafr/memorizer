@@ -54,6 +54,12 @@ async function api(path, opts = {}) {
   return r;
 }
 
+async function readBody(r) {
+  // Guard against non-JSON responses (e.g. a plain-text 500 from a proxy).
+  const text = await r.text();
+  try { return JSON.parse(text); } catch { return { detail: text || r.statusText }; }
+}
+
 function esc(s) {
   const d = document.createElement("div");
   d.textContent = s == null ? "" : String(s);
@@ -65,16 +71,20 @@ document.getElementById("capture-form").onsubmit = async (e) => {
   e.preventDefault();
   const status = document.getElementById("capture-status");
   status.textContent = "Capturing...";
-  const r = await api("/capture", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ url: document.getElementById("capture-url").value }),
-  });
-  const body = await r.json();
-  status.textContent = r.ok
-    ? `Captured #${body.id} (${body.status}). Processing runs in the background — refresh the inbox shortly.`
-    : "Error: " + JSON.stringify(body);
-  if (r.ok) document.getElementById("capture-url").value = "";
+  try {
+    const r = await api("/capture", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ url: document.getElementById("capture-url").value }),
+    });
+    const body = await readBody(r);
+    status.textContent = r.ok
+      ? `Captured #${body.id} (${body.status}). Processing runs in the background — refresh the inbox shortly.`
+      : "Error: " + JSON.stringify(body);
+    if (r.ok) document.getElementById("capture-url").value = "";
+  } catch (err) {
+    status.textContent = "Error: " + (err.message || err);
+  }
 };
 
 // --- Inbox ---
@@ -133,24 +143,33 @@ function showQuestion() {
 async function submitAnswer(cardId) {
   const area = document.getElementById("review-area");
   const answer = document.getElementById("answer-input").value;
-  document.getElementById("answer-submit").disabled = true;
-  const r = await api(`/review/${cardId}/answer`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ answer }),
-  });
-  const body = await r.json();
-  if (!r.ok) {
-    area.innerHTML += `<p class="error">Error: ${esc(JSON.stringify(body))}</p>`;
-    return;
+  const btn = document.getElementById("answer-submit");
+  btn.disabled = true;
+  try {
+    const r = await api(`/review/${cardId}/answer`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ answer }),
+    });
+    const body = await readBody(r);
+    if (!r.ok) {
+      area.innerHTML += `<p class="error">Error: ${esc(JSON.stringify(body))}</p>`;
+      return;
+    }
+    area.innerHTML = `
+      <p><b>Grade:</b> ${esc(body.grade)}</p>
+      <p><b>Feedback:</b> ${esc(body.feedback)}</p>
+      <p><b>Correct answer:</b> ${esc(body.correct_answer)}</p>
+      <p class="muted">Next due: ${esc(body.next_due)}</p>
+      <button id="next-btn">Next</button>`;
+    document.getElementById("next-btn").onclick = () => { idx++; showQuestion(); };
+  } catch (err) {
+    area.innerHTML += `<p class="error">Error: ${esc(err.message || err)}</p>`;
+  } finally {
+    // Re-enable so a failed request doesn't leave the pane stuck. On success the
+    // button was replaced by the result view, so this is a harmless no-op.
+    btn.disabled = false;
   }
-  area.innerHTML = `
-    <p><b>Grade:</b> ${esc(body.grade)}</p>
-    <p><b>Feedback:</b> ${esc(body.feedback)}</p>
-    <p><b>Correct answer:</b> ${esc(body.correct_answer)}</p>
-    <p class="muted">Next due: ${esc(body.next_due)}</p>
-    <button id="next-btn">Next</button>`;
-  document.getElementById("next-btn").onclick = () => { idx++; showQuestion(); };
 }
 document.getElementById("review-refresh").onclick = loadReview;
 
