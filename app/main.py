@@ -1,10 +1,11 @@
-from fastapi import FastAPI, Depends, Response
+from fastapi import FastAPI, Depends, Response, BackgroundTasks
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db import init_db, get_db
 from app.models import Source
 from app.capture import detect_source_type
+from app.pipeline import process_source
 from app.schemas import CaptureRequest
 
 app = FastAPI(title="Memorizer")
@@ -12,6 +13,14 @@ app = FastAPI(title="Memorizer")
 @app.on_event("startup")
 def _startup():
     init_db()
+
+@app.on_event("startup")
+def _services():
+    if not hasattr(app.state, "llm"):
+        from app.llm import ClaudeLLM
+        from app.fetchers import ContentFetcher
+        app.state.llm = ClaudeLLM()
+        app.state.fetcher = ContentFetcher()
 
 @app.get("/health")
 def health():
@@ -25,12 +34,14 @@ def source_to_dict(s: Source) -> dict:
                        "suspended": c.suspended} for c in s.cards]}
 
 @app.post("/capture")
-def capture(req: CaptureRequest, response: Response, db: Session = Depends(get_db)):
+def capture(req: CaptureRequest, response: Response, background_tasks: BackgroundTasks,
+            db: Session = Depends(get_db)):
     existing = db.scalar(select(Source).where(Source.url == req.url))
     if existing:
         return source_to_dict(existing)
     src = Source(url=req.url, source_type=detect_source_type(req.url), status="pending")
     db.add(src)
     db.commit()
+    background_tasks.add_task(process_source, src.id, db, app.state.llm, app.state.fetcher)
     response.status_code = 201
     return source_to_dict(src)
