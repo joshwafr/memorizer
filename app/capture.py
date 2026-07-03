@@ -8,6 +8,9 @@ def detect_source_type(url: str) -> str:
 
 def extract_youtube_id(url: str) -> str | None:
     parsed = urlparse(url)
-    if parsed.netloc.endswith("youtu.be"):
+    host = parsed.netloc.lower()
+    if host not in YOUTUBE_HOSTS:
+        return None
+    if host == "youtu.be":
         return parsed.path.lstrip("/").split("/")[0] or None
     return parse_qs(parsed.query).get("v", [None])[0]
