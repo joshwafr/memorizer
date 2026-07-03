@@ -1,7 +1,10 @@
+import os
+import secrets
 from datetime import datetime, timezone
 from pathlib import Path
 
-from fastapi import FastAPI, Depends, HTTPException, Response, BackgroundTasks
+from fastapi import FastAPI, Depends, HTTPException, Request, Response, BackgroundTasks
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select
 from sqlalchemy.orm import Session
@@ -16,6 +19,18 @@ from app.schemas import CaptureRequest, AnswerRequest, ProfileUpdate
 app = FastAPI(title="Memorizer")
 
 app.mount("/ui", StaticFiles(directory=Path(__file__).parent / "static", html=True), name="ui")
+
+@app.middleware("http")
+async def require_bearer_token(request: Request, call_next):
+    token = os.environ.get("MEMORIZER_TOKEN")  # read at request time, not import time
+    if token:
+        path = request.url.path
+        if path != "/health" and not (path == "/ui" or path.startswith("/ui/")):
+            provided = request.headers.get("authorization", "")
+            expected = f"Bearer {token}"
+            if not secrets.compare_digest(provided.encode(), expected.encode()):
+                return JSONResponse({"detail": "Unauthorized"}, status_code=401)
+    return await call_next(request)
 
 @app.on_event("startup")
 def _startup():
