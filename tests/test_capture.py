@@ -14,3 +14,17 @@ def test_detect_source_type(url, expected):
 def test_extract_youtube_id():
     assert extract_youtube_id("https://www.youtube.com/watch?v=dQw4w9WgXcQ") == "dQw4w9WgXcQ"
     assert extract_youtube_id("https://youtu.be/dQw4w9WgXcQ?t=30") == "dQw4w9WgXcQ"
+
+def test_capture_creates_source(client, db):
+    r = client.post("/capture", json={"url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ"})
+    assert r.status_code == 201
+    body = r.json()
+    assert body["source_type"] == "youtube"
+    assert body["status"] in ("pending", "inbox")  # background pipeline may already have run
+
+def test_capture_duplicate_url_returns_existing(client, db):
+    url = "https://www.ft.com/content/abc-123"
+    first = client.post("/capture", json={"url": url}).json()
+    second = client.post("/capture", json={"url": url})
+    assert second.status_code == 200
+    assert second.json()["id"] == first["id"]
