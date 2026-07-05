@@ -1,0 +1,308 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		3D0318444193FA8F9C2826F4 /* MemorizerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E259303E4C942F34A09F55B8 /* MemorizerApp.swift */; };
+		40A311D7D6F12317621BA7C4 /* ShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1D841ABECE875E7288C030FB /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		74B009053289274EDF256A25 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47429D413DF41D5D7AEAAE2 /* HomeView.swift */; };
+		881C7456D720541A37F88BB0 /* ReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7CC0C26C1E3AD745CC04490 /* ReviewView.swift */; };
+		9BCF700BE6B05AAF73EF0365 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4760046B471BDDB46FFA16E8 /* ShareViewController.swift */; };
+		9E719889F67F9EDE028A23CB /* CardsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 329849CEF74C2B25D3AA222C /* CardsView.swift */; };
+		A3BE370617B4E3C9F7D686AD /* API.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BD5659E32C432319237DB1A /* API.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D512179C8B49F6AF3DDD9129 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 844BD7EC930918C9A4FE73D2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 397506219972C49DADC7C0AE;
+			remoteInfo = ShareExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F70C0D98C6703BF88FF11AE1 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				40A311D7D6F12317621BA7C4 /* ShareExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		1D841ABECE875E7288C030FB /* ShareExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		1FC9AE1B33B2F4A84B3A4AEC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		329849CEF74C2B25D3AA222C /* CardsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardsView.swift; sourceTree = "<group>"; };
+		4760046B471BDDB46FFA16E8 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		7BD5659E32C432319237DB1A /* API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
+		B7CC0C26C1E3AD745CC04490 /* ReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewView.swift; sourceTree = "<group>"; };
+		D5986A1F4B486277DB722AC2 /* Memorizer.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Memorizer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E259303E4C942F34A09F55B8 /* MemorizerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemorizerApp.swift; sourceTree = "<group>"; };
+		E47429D413DF41D5D7AEAAE2 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		2310FDC5CE94BD2CE55F2C16 /* Memorizer */ = {
+			isa = PBXGroup;
+			children = (
+				7BD5659E32C432319237DB1A /* API.swift */,
+				E259303E4C942F34A09F55B8 /* MemorizerApp.swift */,
+				417E42D9021E7C882A01CA4D /* Views */,
+			);
+			path = Memorizer;
+			sourceTree = "<group>";
+		};
+		381ED7CD77F8102C746FA4AD = {
+			isa = PBXGroup;
+			children = (
+				2310FDC5CE94BD2CE55F2C16 /* Memorizer */,
+				E00BA468EC91FE93D4FC86A4 /* ShareExtension */,
+				A51321DECE3BF801EB7CB9FC /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		417E42D9021E7C882A01CA4D /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				329849CEF74C2B25D3AA222C /* CardsView.swift */,
+				E47429D413DF41D5D7AEAAE2 /* HomeView.swift */,
+				B7CC0C26C1E3AD745CC04490 /* ReviewView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A51321DECE3BF801EB7CB9FC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D5986A1F4B486277DB722AC2 /* Memorizer.app */,
+				1D841ABECE875E7288C030FB /* ShareExtension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E00BA468EC91FE93D4FC86A4 /* ShareExtension */ = {
+			isa = PBXGroup;
+			children = (
+				1FC9AE1B33B2F4A84B3A4AEC /* Info.plist */,
+				4760046B471BDDB46FFA16E8 /* ShareViewController.swift */,
+			);
+			path = ShareExtension;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		397506219972C49DADC7C0AE /* ShareExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C0FEB873BB928A642E9F6FB1 /* Build configuration list for PBXNativeTarget "ShareExtension" */;
+			buildPhases = (
+				A7972363647912C01AEB2A85 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ShareExtension;
+			packageProductDependencies = (
+			);
+			productName = ShareExtension;
+			productReference = 1D841ABECE875E7288C030FB /* ShareExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		C7E6E4F4762F11C3FA0F2FAE /* Memorizer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 83DB34219ECFD2D0682F8AB3 /* Build configuration list for PBXNativeTarget "Memorizer" */;
+			buildPhases = (
+				3E5AF23B22638EF1E30DD879 /* Sources */,
+				F70C0D98C6703BF88FF11AE1 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B10A7F381643EC2EE14550CD /* PBXTargetDependency */,
+			);
+			name = Memorizer;
+			packageProductDependencies = (
+			);
+			productName = Memorizer;
+			productReference = D5986A1F4B486277DB722AC2 /* Memorizer.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		844BD7EC930918C9A4FE73D2 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = 0E9CBD11E481D251ABC01EBD /* Build configuration list for PBXProject "Memorizer" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 381ED7CD77F8102C746FA4AD;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = A51321DECE3BF801EB7CB9FC /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C7E6E4F4762F11C3FA0F2FAE /* Memorizer */,
+				397506219972C49DADC7C0AE /* ShareExtension */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3E5AF23B22638EF1E30DD879 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A3BE370617B4E3C9F7D686AD /* API.swift in Sources */,
+				9E719889F67F9EDE028A23CB /* CardsView.swift in Sources */,
+				74B009053289274EDF256A25 /* HomeView.swift in Sources */,
+				3D0318444193FA8F9C2826F4 /* MemorizerApp.swift in Sources */,
+				881C7456D720541A37F88BB0 /* ReviewView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A7972363647912C01AEB2A85 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9BCF700BE6B05AAF73EF0365 /* ShareViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B10A7F381643EC2EE14550CD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 397506219972C49DADC7C0AE /* ShareExtension */;
+			targetProxy = D512179C8B49F6AF3DDD9129 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		14381E6253F3EE213006D21F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+			};
+			name = Release;
+		};
+		3D5227EF717AF08B74BDA31B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Memorizer;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joshwafr.memorizer;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		7495162343E9BE8943A32001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joshwafr.memorizer.share;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		951F1BBA3E9C1EB454C0275F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		B2484F69E12B470751D29951 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 1;
+				INFOPLIST_FILE = ShareExtension/Info.plist;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joshwafr.memorizer.share;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		DCAF61E988244BE19298EC55 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Memorizer;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.joshwafr.memorizer;
+				SWIFT_VERSION = 5.9;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0E9CBD11E481D251ABC01EBD /* Build configuration list for PBXProject "Memorizer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				951F1BBA3E9C1EB454C0275F /* Debug */,
+				14381E6253F3EE213006D21F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		83DB34219ECFD2D0682F8AB3 /* Build configuration list for PBXNativeTarget "Memorizer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DCAF61E988244BE19298EC55 /* Debug */,
+				3D5227EF717AF08B74BDA31B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		C0FEB873BB928A642E9F6FB1 /* Build configuration list for PBXNativeTarget "ShareExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7495162343E9BE8943A32001 /* Debug */,
+				B2484F69E12B470751D29951 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 844BD7EC930918C9A4FE73D2 /* Project object */;
+}
