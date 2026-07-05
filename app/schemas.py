@@ -8,3 +8,8 @@ class AnswerRequest(BaseModel):
 
 class ProfileUpdate(BaseModel):
     text: str
+
+class CardUpdate(BaseModel):
+    question: str | None = None
+    answer: str | None = None
+    suspended: bool | None = None

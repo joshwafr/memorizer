@@ -50,11 +50,38 @@
   .grade.good, .grade.easy { color: var(--ok); }
   .grade.hard { color: #b8860b; }
   .grade.again { color: var(--bad); }
+
+  /* menu + cards manager */
+  nav { display: flex; gap: 0.5em; margin-bottom: 1em; }
+  nav button { border: none; background: none; font-weight: 600; color: var(--muted);
+               padding: 0.4em 0.8em; border-radius: 6px; }
+  nav button.active { background: var(--accent); color: #fff; }
+  .hidden { display: none; }
+  .filters { display: flex; gap: 0.4em; flex-wrap: wrap; margin-bottom: 0.8em; }
+  .filters button.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .status-badge { border-radius: 10px; padding: 0.1em 0.6em; font-size: 0.78em; white-space: nowrap; }
+  .status-badge.learning { background: #e6f6ec; color: var(--ok); }
+  .status-badge.inbox { background: #eef; color: var(--accent); }
+  .status-badge.suspended { background: #fdf3d7; color: #b8860b; }
+  .status-badge.inactive { background: #eee; color: var(--muted); }
+  .card-row { border: 1px solid #e3e3e3; border-radius: 8px; margin: 0.5em 0; overflow: hidden; }
+  .card-head { display: flex; align-items: center; gap: 0.6em; padding: 0.6em 0.8em; cursor: pointer; }
+  .card-head:hover { background: #f4f6ff; }
+  .card-q { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .card-detail { display: none; padding: 0.8em; border-top: 1px solid #eee; }
+  .card-row.open .card-detail { display: block; }
+  .card-detail label { font-size: 0.85em; color: var(--muted); display: block; margin: 0.5em 0 0.2em; }
+  button.danger { border-color: var(--bad); color: var(--bad); }
 </style>
 </head>
 <body>
 <h1>🧠 Memorizer</h1>
+<nav>
+  <button id="tab-home" class="active">🏠 Home</button>
+  <button id="tab-cards">🗂 Cards</button>
+</nav>
 
+<div id="view-home">
 <section id="capture-section">
   <h2>Capture</h2>
   <form id="capture-form" class="capture-row">
@@ -79,6 +106,22 @@
       <button id="review-refresh" style="float:right">Refresh</button></h2>
   <div id="review-area"></div>
 </section>
+</div>
+
+<div id="view-cards" class="hidden">
+<section>
+  <h2>🗂 All cards <span id="cards-count" class="muted"></span>
+      <button id="cards-refresh" style="float:right">Refresh</button></h2>
+  <div class="filters" id="card-filters">
+    <button data-filter="all" class="on">All</button>
+    <button data-filter="learning">Learning</button>
+    <button data-filter="inbox">In inbox</button>
+    <button data-filter="suspended">Suspended</button>
+    <button data-filter="inactive">Inactive</button>
+  </div>
+  <div id="cards-list"></div>
+</section>
+</div>
 
 <script>
 async function api(path, opts = {}) {
@@ -258,6 +301,105 @@ async function submitAnswer(cardId) {
   }
 }
 document.getElementById("review-refresh").onclick = loadReview;
+
+// --- Menu tabs ---
+function showTab(name) {
+  document.getElementById("view-home").classList.toggle("hidden", name !== "home");
+  document.getElementById("view-cards").classList.toggle("hidden", name !== "cards");
+  document.getElementById("tab-home").classList.toggle("active", name === "home");
+  document.getElementById("tab-cards").classList.toggle("active", name === "cards");
+  if (name === "cards") loadCards();
+}
+document.getElementById("tab-home").onclick = () => showTab("home");
+document.getElementById("tab-cards").onclick = () => showTab("cards");
+
+// --- Cards manager ---
+let allCards = [], cardFilter = "all";
+
+async function loadCards() {
+  const r = await api("/cards");
+  const list = document.getElementById("cards-list");
+  if (!r.ok) { list.innerHTML = '<p class="error">Failed to load cards.</p>'; return; }
+  allCards = await r.json();
+  renderCards();
+}
+
+function fmtDue(iso) {
+  if (!iso) return "";
+  const d = new Date(iso), now = new Date();
+  const days = Math.round((d - now) / 86400000);
+  if (days <= 0) return "due now";
+  if (days === 1) return "due tomorrow";
+  return `due in ${days} days`;
+}
+
+function renderCards() {
+  const list = document.getElementById("cards-list");
+  const cards = allCards.filter(c => cardFilter === "all" || c.status === cardFilter);
+  document.getElementById("cards-count").textContent = `(${cards.length})`;
+  if (!cards.length) { list.innerHTML = '<p class="muted">No cards here.</p>'; return; }
+  list.innerHTML = cards.map(c => `
+    <div class="card-row" data-id="${c.id}">
+      <div class="card-head">
+        <span class="status-badge ${esc(c.status)}">${esc(c.status)}</span>
+        <span class="card-q">${esc(c.question)}</span>
+        <span class="muted">${c.suspended ? "" : esc(fmtDue(c.due_at))}</span>
+      </div>
+      <div class="card-detail">
+        <p class="muted">${c.source_type === "youtube" ? "▶️" : "📰"} ${esc(c.source_title || "")}</p>
+        <label>Question</label>
+        <textarea class="edit-q" rows="3">${esc(c.question)}</textarea>
+        <label>Answer</label>
+        <textarea class="edit-a" rows="5">${esc(c.answer)}</textarea>
+        <div class="actions">
+          <button data-card-action="save" class="primary">Save changes</button>
+          <button data-card-action="toggle-suspend">${c.suspended ? "▶ Resume" : "⏸ Suspend"}</button>
+          <button data-card-action="delete" class="danger">🗑 Delete</button>
+        </div>
+      </div>
+    </div>`).join("");
+}
+
+document.getElementById("card-filters").onclick = (e) => {
+  const f = e.target.dataset.filter;
+  if (!f) return;
+  cardFilter = f;
+  document.querySelectorAll("#card-filters button").forEach(b =>
+    b.classList.toggle("on", b.dataset.filter === f));
+  renderCards();
+};
+
+document.getElementById("cards-list").onclick = async (e) => {
+  const action = e.target.dataset.cardAction;
+  const row = e.target.closest(".card-row");
+  if (!action) {
+    if (e.target.closest(".card-head")) row.classList.toggle("open");
+    return;
+  }
+  const id = Number(row.dataset.id);
+  const card = allCards.find(c => c.id === id);
+  e.target.disabled = true;
+  try {
+    if (action === "save") {
+      await api(`/cards/${id}`, { method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: row.querySelector(".edit-q").value,
+                               answer: row.querySelector(".edit-a").value }) });
+    } else if (action === "toggle-suspend") {
+      await api(`/cards/${id}`, { method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ suspended: !card.suspended }) });
+    } else if (action === "delete") {
+      if (!confirm("Delete this card permanently? Its review history goes with it.")) return;
+      await api(`/cards/${id}`, { method: "DELETE" });
+    }
+    await loadCards();
+    loadReview();
+  } finally {
+    e.target.disabled = false;
+  }
+};
+document.getElementById("cards-refresh").onclick = loadCards;
 
 loadInbox();
 loadReview();

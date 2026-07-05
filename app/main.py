@@ -15,7 +15,7 @@ from app.db import init_db, get_db
 from app.models import Source, Card, Review, InterestProfile
 from app.capture import detect_source_type
 from app.pipeline import process_source, get_profile
-from app.schemas import CaptureRequest, AnswerRequest, ProfileUpdate
+from app.schemas import CaptureRequest, AnswerRequest, ProfileUpdate, CardUpdate
 
 logger = logging.getLogger(__name__)
 
@@ -123,6 +123,48 @@ def reject(source_id: int, db: Session = Depends(get_db)):
     src.status = "rejected"
     db.commit()
     return source_to_dict(src)
+
+def card_status(c: Card) -> str:
+    if c.suspended:
+        return "suspended"
+    if c.fsrs_state is not None:
+        return "learning"
+    return "inbox" if c.source.status == "inbox" else "inactive"
+
+@app.get("/cards")
+def list_cards(db: Session = Depends(get_db)):
+    cards = db.scalars(select(Card).order_by(Card.created_at.desc())).all()
+    return [{"id": c.id, "question": c.question, "answer": c.answer,
+             "status": card_status(c), "suspended": c.suspended,
+             "due_at": c.due_at.isoformat() if c.due_at else None,
+             "source_title": c.source.title, "source_type": c.source.source_type}
+            for c in cards]
+
+@app.patch("/cards/{card_id}")
+def update_card(card_id: int, req: CardUpdate, db: Session = Depends(get_db)):
+    card = db.get(Card, card_id)
+    if not card:
+        raise HTTPException(404, "No card with that id")
+    if req.question is not None:
+        card.question = req.question
+    if req.answer is not None:
+        card.answer = req.answer
+    if req.suspended is not None:
+        card.suspended = req.suspended
+    db.commit()
+    return {"id": card.id, "question": card.question, "answer": card.answer,
+            "status": card_status(card), "suspended": card.suspended}
+
+@app.delete("/cards/{card_id}")
+def delete_card(card_id: int, db: Session = Depends(get_db)):
+    card = db.get(Card, card_id)
+    if not card:
+        raise HTTPException(404, "No card with that id")
+    for review in db.scalars(select(Review).where(Review.card_id == card_id)):
+        db.delete(review)
+    db.delete(card)
+    db.commit()
+    return {"deleted": card_id}
 
 @app.get("/review/due")
 def due_cards(db: Session = Depends(get_db)):
