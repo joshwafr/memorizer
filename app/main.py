@@ -86,6 +86,19 @@ def capture(req: CaptureRequest, response: Response, background_tasks: Backgroun
     response.status_code = 201
     return source_to_dict(src)
 
+# How far through the pipeline each status is, for the UI progress bar.
+PROGRESS = {"pending": 15, "fetched": 60, "inbox": 100, "approved": 100,
+            "rejected": 100, "discarded": 100, "failed": 100}
+
+@app.get("/sources/{source_id}")
+def source_status(source_id: int, db: Session = Depends(get_db)):
+    src = db.get(Source, source_id)
+    if not src:
+        raise HTTPException(404, "No source with that id")
+    return {"id": src.id, "status": src.status, "progress": PROGRESS.get(src.status, 0),
+            "title": src.title, "triage_reason": src.triage_reason,
+            "card_count": len(src.cards)}
+
 @app.get("/inbox")
 def inbox(db: Session = Depends(get_db)):
     sources = db.scalars(select(Source).where(Source.status == "inbox")).all()

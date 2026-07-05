@@ -28,3 +28,25 @@ def test_capture_duplicate_url_returns_existing(client, db):
     second = client.post("/capture", json={"url": url})
     assert second.status_code == 200
     assert second.json()["id"] == first["id"]
+
+
+def test_source_status_progress(client, db):
+    from app.models import Source
+    src = Source(url="https://youtu.be/progress1234", source_type="youtube", status="pending")
+    db.add(src)
+    db.commit()
+    r = client.get(f"/sources/{src.id}")
+    assert r.status_code == 200
+    assert r.json()["progress"] == 15
+    src.status = "fetched"
+    db.commit()
+    assert client.get(f"/sources/{src.id}").json()["progress"] == 60
+    src.status = "inbox"
+    db.commit()
+    body = client.get(f"/sources/{src.id}").json()
+    assert body["progress"] == 100
+    assert body["status"] == "inbox"
+
+
+def test_source_status_missing(client):
+    assert client.get("/sources/9999").status_code == 404
