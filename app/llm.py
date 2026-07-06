@@ -21,18 +21,27 @@ CONTENT (title: {title}):\n{content}\n
 Should this become learning material? Respond with JSON only:
 {{"keep": true/false, "reason": "<one sentence>", "title": "<inferred title if missing>"}}"""
 
-CARDS_PROMPT = """Distill this content into 2-5 rich insight cards for spaced repetition.
+CARDS_PROMPT = """Distill this content into 2-4 HIGH-LEVEL insight cards for spaced repetition.
+Focus on the big ideas: core arguments, frameworks, mechanisms, and their implications —
+what is worth still knowing a year from now. Do NOT create trivia cards: no isolated
+numbers, names, dates, or minor details unless that detail IS the central insight.
 Each card: a substantial, self-contained question (include enough source context to make
 sense weeks later, e.g. "From the FT piece on TSMC: ..."), a thorough answer, and 2-4
-key_points a correct answer must mention. Respond with JSON only:
+key_points a correct answer must cover. Respond with JSON only:
 [{{"question": "...", "answer": "...", "key_points": ["..."]}}]\n
 CONTENT (title: {title}):\n{content}"""
 
 GRADE_PROMPT = """Grade this spaced-repetition answer. QUESTION: {question}
 EXPECTED ANSWER: {answer}\nKEY POINTS: {key_points}\nUSER'S ANSWER: {user_answer}\n
 Map to FSRS: "again" (didn't know), "hard" (partial, struggled), "good" (got the substance),
-"easy" (complete and confident). Respond with JSON only:
-{{"grade": "again|hard|good|easy", "feedback": "<2-3 sentences: what they got right and what they missed>"}}"""
+"easy" (complete and confident).
+Feedback rules: if the grade is "again" or "hard", the feedback must TEACH — explain the
+correct answer clearly and memorably in 3-5 sentences, including WHY it is true (the
+mechanism or reasoning), so the user genuinely knows it next time. If "good" or "easy",
+briefly confirm and add whatever nuance they missed in 1-2 sentences. The feedback is read
+aloud during voice sessions, so write flowing prose without bullet points or markdown.
+Respond with JSON only:
+{{"grade": "again|hard|good|easy", "feedback": "<per the feedback rules>"}}"""
 
 class ClaudeLLM:
     def __init__(self):
