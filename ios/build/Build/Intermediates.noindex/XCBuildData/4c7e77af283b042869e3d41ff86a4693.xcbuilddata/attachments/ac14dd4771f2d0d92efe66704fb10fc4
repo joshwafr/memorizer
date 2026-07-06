@@ -1,0 +1,59 @@
+{
+  "" : {
+    "diagnostics" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/Memorizer-primary.dia",
+    "emit-module-dependencies" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/Memorizer-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/Memorizer-primary-emit-module.dia",
+    "pch" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/Memorizer-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/Memorizer-primary.swiftdeps"
+  },
+  "/Users/josh/Desktop/Memorizer/ios/Memorizer/API.swift" : {
+    "const-values" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/API.swiftconstvalues",
+    "dependencies" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/API.d",
+    "diagnostics" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/API.dia",
+    "index-unit-output-path" : "/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/API.o",
+    "llvm-bc" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/API.bc",
+    "object" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/API.o",
+    "swift-dependencies" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/API.swiftdeps",
+    "swiftmodule" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/API~partial.swiftmodule"
+  },
+  "/Users/josh/Desktop/Memorizer/ios/Memorizer/MemorizerApp.swift" : {
+    "const-values" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/MemorizerApp.swiftconstvalues",
+    "dependencies" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/MemorizerApp.d",
+    "diagnostics" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/MemorizerApp.dia",
+    "index-unit-output-path" : "/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/MemorizerApp.o",
+    "llvm-bc" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/MemorizerApp.bc",
+    "object" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/MemorizerApp.o",
+    "swift-dependencies" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/MemorizerApp.swiftdeps",
+    "swiftmodule" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/MemorizerApp~partial.swiftmodule"
+  },
+  "/Users/josh/Desktop/Memorizer/ios/Memorizer/Views/CardsView.swift" : {
+    "const-values" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/CardsView.swiftconstvalues",
+    "dependencies" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/CardsView.d",
+    "diagnostics" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/CardsView.dia",
+    "index-unit-output-path" : "/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/CardsView.o",
+    "llvm-bc" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/CardsView.bc",
+    "object" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/CardsView.o",
+    "swift-dependencies" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/CardsView.swiftdeps",
+    "swiftmodule" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/CardsView~partial.swiftmodule"
+  },
+  "/Users/josh/Desktop/Memorizer/ios/Memorizer/Views/HomeView.swift" : {
+    "const-values" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/HomeView.swiftconstvalues",
+    "dependencies" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/HomeView.d",
+    "diagnostics" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/HomeView.dia",
+    "index-unit-output-path" : "/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/HomeView.o",
+    "llvm-bc" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/HomeView.bc",
+    "object" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/HomeView.o",
+    "swift-dependencies" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/HomeView.swiftdeps",
+    "swiftmodule" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/HomeView~partial.swiftmodule"
+  },
+  "/Users/josh/Desktop/Memorizer/ios/Memorizer/Views/ReviewView.swift" : {
+    "const-values" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/ReviewView.swiftconstvalues",
+    "dependencies" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/ReviewView.d",
+    "diagnostics" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/ReviewView.dia",
+    "index-unit-output-path" : "/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/ReviewView.o",
+    "llvm-bc" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/ReviewView.bc",
+    "object" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/ReviewView.o",
+    "swift-dependencies" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/ReviewView.swiftdeps",
+    "swiftmodule" : "/Users/josh/Desktop/Memorizer/ios/build/Build/Intermediates.noindex/Memorizer.build/Debug-iphonesimulator/Memorizer.build/Objects-normal/arm64/ReviewView~partial.swiftmodule"
+  }
+}

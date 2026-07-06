@@ -1,0 +1,4 @@
+Target dependency graph (2 targets)
+Target 'Memorizer' in project 'Memorizer'
+➜ Explicit dependency on target 'ShareExtension' in project 'Memorizer'
+Target 'ShareExtension' in project 'Memorizer' (no dependencies)

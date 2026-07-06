@@ -9,6 +9,9 @@ class AnswerRequest(BaseModel):
 class ProfileUpdate(BaseModel):
     text: str
 
+class TTSRequest(BaseModel):
+    text: str
+
 class CardUpdate(BaseModel):
     question: str | None = None
     answer: str | None = None

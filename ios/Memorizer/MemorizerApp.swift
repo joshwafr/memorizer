@@ -9,6 +9,8 @@ struct MemorizerApp: App {
                     .tabItem { Label("Home", systemImage: "tray.and.arrow.down") }
                 ReviewView()
                     .tabItem { Label("Review", systemImage: "brain.head.profile") }
+                VoiceView()
+                    .tabItem { Label("Voice", systemImage: "waveform") }
                 CardsView()
                     .tabItem { Label("Cards", systemImage: "rectangle.stack") }
             }

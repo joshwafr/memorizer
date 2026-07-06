@@ -15,7 +15,7 @@ from app.db import init_db, get_db
 from app.models import Source, Card, Review, InterestProfile
 from app.capture import detect_source_type
 from app.pipeline import process_source, get_profile
-from app.schemas import CaptureRequest, AnswerRequest, ProfileUpdate, CardUpdate
+from app.schemas import CaptureRequest, AnswerRequest, ProfileUpdate, CardUpdate, TTSRequest
 
 logger = logging.getLogger(__name__)
 
@@ -192,6 +192,21 @@ def answer_card(card_id: int, req: AnswerRequest, db: Session = Depends(get_db))
     db.commit()
     return {"grade": grade, "feedback": feedback,
             "correct_answer": card.answer, "next_due": card.due_at.isoformat()}
+
+@app.post("/tts")
+def tts(req: TTSRequest):
+    import httpx
+    key = os.environ.get("OPENAI_API_KEY")
+    if not key:
+        raise HTTPException(503, "TTS not configured — set OPENAI_API_KEY")
+    r = httpx.post("https://api.openai.com/v1/audio/speech",
+                   headers={"Authorization": f"Bearer {key}"},
+                   json={"model": "gpt-4o-mini-tts", "voice": "alloy",
+                         "input": req.text[:4000]},
+                   timeout=60)
+    if r.status_code != 200:
+        raise HTTPException(502, f"TTS provider error {r.status_code}")
+    return Response(content=r.content, media_type="audio/mpeg")
 
 @app.get("/profile")
 def read_profile(db: Session = Depends(get_db)):

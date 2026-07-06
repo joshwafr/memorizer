@@ -13,12 +13,18 @@ targets:
     dependencies:
       - target: ShareExtension
         embed: true
+    info:
+      path: Memorizer/Info.plist
+      properties:
+        UIBackgroundModes: [audio]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.joshwafr.memorizer
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_KEY_UILaunchScreen_Generation: YES
         INFOPLIST_KEY_CFBundleDisplayName: Memorizer
+        INFOPLIST_KEY_NSMicrophoneUsageDescription: "Memorizer listens to your spoken answers during voice review sessions."
+        INFOPLIST_KEY_NSSpeechRecognitionUsageDescription: "Memorizer transcribes your spoken answers on-device so they can be graded."
         INFOPLIST_KEY_UISupportedInterfaceOrientations: UIInterfaceOrientationPortrait
         TARGETED_DEVICE_FAMILY: "1,2"
         CURRENT_PROJECT_VERSION: 1

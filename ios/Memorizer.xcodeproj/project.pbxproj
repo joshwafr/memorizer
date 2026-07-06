@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		033F8CEEB562E34A65F16B2F /* VoiceSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB83F5F27398210445F45E47 /* VoiceSession.swift */; };
+		06C26F10AFFCEA74DD21AD91 /* VoiceView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA1DED88AB4537A857A2B2AA /* VoiceView.swift */; };
 		3D0318444193FA8F9C2826F4 /* MemorizerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = E259303E4C942F34A09F55B8 /* MemorizerApp.swift */; };
 		40A311D7D6F12317621BA7C4 /* ShareExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1D841ABECE875E7288C030FB /* ShareExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		74B009053289274EDF256A25 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E47429D413DF41D5D7AEAAE2 /* HomeView.swift */; };
@@ -41,12 +43,15 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		03C90050832CF0BDE0B0573B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		1D841ABECE875E7288C030FB /* ShareExtension.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = ShareExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		1FC9AE1B33B2F4A84B3A4AEC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		329849CEF74C2B25D3AA222C /* CardsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardsView.swift; sourceTree = "<group>"; };
 		4760046B471BDDB46FFA16E8 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		7BD5659E32C432319237DB1A /* API.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = API.swift; sourceTree = "<group>"; };
 		B7CC0C26C1E3AD745CC04490 /* ReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewView.swift; sourceTree = "<group>"; };
+		BA1DED88AB4537A857A2B2AA /* VoiceView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceView.swift; sourceTree = "<group>"; };
+		CB83F5F27398210445F45E47 /* VoiceSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceSession.swift; sourceTree = "<group>"; };
 		D5986A1F4B486277DB722AC2 /* Memorizer.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Memorizer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E259303E4C942F34A09F55B8 /* MemorizerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemorizerApp.swift; sourceTree = "<group>"; };
 		E47429D413DF41D5D7AEAAE2 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
@@ -57,8 +62,10 @@
 			isa = PBXGroup;
 			children = (
 				7BD5659E32C432319237DB1A /* API.swift */,
+				03C90050832CF0BDE0B0573B /* Info.plist */,
 				E259303E4C942F34A09F55B8 /* MemorizerApp.swift */,
 				417E42D9021E7C882A01CA4D /* Views */,
+				AC1248A0DF9CFFAA9A171566 /* Voice */,
 			);
 			path = Memorizer;
 			sourceTree = "<group>";
@@ -89,6 +96,15 @@
 				1D841ABECE875E7288C030FB /* ShareExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		AC1248A0DF9CFFAA9A171566 /* Voice */ = {
+			isa = PBXGroup;
+			children = (
+				CB83F5F27398210445F45E47 /* VoiceSession.swift */,
+				BA1DED88AB4537A857A2B2AA /* VoiceView.swift */,
+			);
+			path = Voice;
 			sourceTree = "<group>";
 		};
 		E00BA468EC91FE93D4FC86A4 /* ShareExtension */ = {
@@ -180,6 +196,8 @@
 				74B009053289274EDF256A25 /* HomeView.swift in Sources */,
 				3D0318444193FA8F9C2826F4 /* MemorizerApp.swift in Sources */,
 				881C7456D720541A37F88BB0 /* ReviewView.swift in Sources */,
+				033F8CEEB562E34A65F16B2F /* VoiceSession.swift in Sources */,
+				06C26F10AFFCEA74DD21AD91 /* VoiceView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -265,7 +283,10 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Memorizer/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Memorizer;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Memorizer listens to your spoken answers during voice review sessions.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Memorizer transcribes your spoken answers on-device so they can be graded.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -386,7 +407,10 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Memorizer/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Memorizer;
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Memorizer listens to your spoken answers during voice review sessions.";
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "Memorizer transcribes your spoken answers on-device so they can be graded.";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
