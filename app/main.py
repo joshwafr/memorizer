@@ -28,7 +28,8 @@ async def require_bearer_token(request: Request, call_next):
     token = os.environ.get("MEMORIZER_TOKEN")  # read at request time, not import time
     if token:
         path = request.url.path
-        if path not in ("/", "/health") and not (path == "/ui" or path.startswith("/ui/")):
+        open_paths = ("/", "/health", "/spotify/login", "/spotify/callback")
+        if path not in open_paths and not (path == "/ui" or path.startswith("/ui/")):
             provided = request.headers.get("authorization", "")
             expected = f"Bearer {token}"
             if not secrets.compare_digest(provided.encode(), expected.encode()):
@@ -53,6 +54,18 @@ def _services():
     if not hasattr(app.state, "session_factory"):
         from app.db import SessionLocal
         app.state.session_factory = SessionLocal
+
+@app.on_event("startup")
+def _spotify_poller():
+    if os.environ.get("SPOTIFY_CLIENT_ID") and not hasattr(app.state, "scheduler"):
+        from apscheduler.schedulers.background import BackgroundScheduler
+        from app.spotify_sync import poll_once
+        scheduler = BackgroundScheduler()
+        scheduler.add_job(lambda: poll_once(app.state.session_factory, app.state.llm, scheduler),
+                          "interval", minutes=2, max_instances=1, coalesce=True)
+        scheduler.start()
+        app.state.scheduler = scheduler
+        logger.info("Spotify poller started (every 2 min)")
 
 @app.get("/")
 def root():
@@ -192,6 +205,38 @@ def answer_card(card_id: int, req: AnswerRequest, db: Session = Depends(get_db))
     db.commit()
     return {"grade": grade, "feedback": feedback,
             "correct_answer": card.answer, "next_due": card.due_at.isoformat()}
+
+@app.get("/spotify/login")
+def spotify_login():
+    from app.spotify import authorize_url, client_creds
+    if not all(client_creds()):
+        raise HTTPException(503, "Spotify not configured — set SPOTIFY_CLIENT_ID and SPOTIFY_CLIENT_SECRET")
+    return RedirectResponse(authorize_url())
+
+@app.get("/spotify/callback")
+def spotify_callback(code: str, db: Session = Depends(get_db)):
+    from fastapi.responses import HTMLResponse
+    from app.spotify import exchange_code, REFRESH_TOKEN_KEY
+    from app.spotify_sync import set_setting
+    tokens = exchange_code(code)
+    refresh = tokens.get("refresh_token")
+    if not refresh:
+        raise HTTPException(502, "Spotify did not return a refresh token")
+    set_setting(db, REFRESH_TOKEN_KEY, refresh)
+    return HTMLResponse("<h2>✅ Spotify connected</h2><p>Memorizer now tracks podcasts you "
+                        "listen to at least 80% of. You can close this tab.</p>")
+
+@app.get("/spotify/status")
+def spotify_status(db: Session = Depends(get_db)):
+    from app.spotify import REFRESH_TOKEN_KEY
+    from app.spotify_sync import get_setting, listen_ratio
+    from app.models import ListenProgress
+    rows = db.scalars(select(ListenProgress)
+                      .order_by(ListenProgress.updated_at.desc()).limit(10)).all()
+    return {"connected": get_setting(db, REFRESH_TOKEN_KEY) is not None,
+            "recent": [{"show": r.show_name, "title": r.title,
+                        "listened_pct": round(listen_ratio(r) * 100),
+                        "consumed": r.consumed} for r in rows]}
 
 @app.post("/tts")
 def tts(req: TTSRequest):

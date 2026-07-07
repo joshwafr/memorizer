@@ -48,3 +48,21 @@ class InterestProfile(Base):
     text: Mapped[str] = mapped_column(Text)
     version: Mapped[int] = mapped_column(default=1)
     created_at: Mapped[datetime] = mapped_column(UTCDateTime(timezone=True), default=utcnow)
+
+class AppSetting(Base):
+    __tablename__ = "app_settings"
+    key: Mapped[str] = mapped_column(String(100), primary_key=True)
+    value: Mapped[str] = mapped_column(Text)
+
+class ListenProgress(Base):
+    __tablename__ = "listen_progress"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    episode_id: Mapped[str] = mapped_column(String(100), unique=True)   # spotify episode id
+    kind: Mapped[str] = mapped_column(String(20), default="podcast")
+    show_name: Mapped[str | None] = mapped_column(String(300), nullable=True)
+    title: Mapped[str] = mapped_column(String(500))
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    duration_ms: Mapped[int] = mapped_column(default=0)
+    max_position_ms: Mapped[int] = mapped_column(default=0)
+    consumed: Mapped[bool] = mapped_column(Boolean, default=False)
+    updated_at: Mapped[datetime] = mapped_column(UTCDateTime(timezone=True), default=utcnow)
