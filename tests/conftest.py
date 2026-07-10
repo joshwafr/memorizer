@@ -32,7 +32,7 @@ class FakeLLM:
         return {"grade": self.grade_value, "feedback": "fake feedback"}
 
 class FakeFetcher:
-    def fetch(self, url, source_type):
+    def fetch(self, url, source_type, cookies=None):
         return "fake transcript content"
 
 @pytest.fixture()

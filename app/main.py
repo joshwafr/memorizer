@@ -15,7 +15,8 @@ from app.db import init_db, get_db
 from app.models import Source, Card, Review, InterestProfile
 from app.capture import detect_source_type
 from app.pipeline import process_source, get_profile
-from app.schemas import CaptureRequest, AnswerRequest, ProfileUpdate, CardUpdate, TTSRequest
+from app.schemas import (CaptureRequest, AnswerRequest, ProfileUpdate, CardUpdate,
+                         TTSRequest, SourceText, CookiesUpdate)
 
 logger = logging.getLogger(__name__)
 
@@ -87,7 +88,10 @@ def capture(req: CaptureRequest, response: Response, background_tasks: Backgroun
             db: Session = Depends(get_db)):
     existing = db.scalar(select(Source).where(Source.url == req.url))
     if existing:
-        if existing.status in ("pending", "failed"):
+        if existing.status in ("pending", "failed", "needs_text"):
+            if existing.status == "needs_text":
+                existing.status = "pending"
+                db.commit()
             background_tasks.add_task(process_source, existing.id, app.state.session_factory,
                                       app.state.llm, app.state.fetcher)
         return source_to_dict(existing)
@@ -101,7 +105,7 @@ def capture(req: CaptureRequest, response: Response, background_tasks: Backgroun
 
 # How far through the pipeline each status is, for the UI progress bar.
 PROGRESS = {"pending": 15, "fetched": 60, "inbox": 100, "approved": 100,
-            "rejected": 100, "discarded": 100, "failed": 100}
+            "rejected": 100, "discarded": 100, "failed": 100, "needs_text": 100}
 
 @app.get("/sources/{source_id}")
 def source_status(source_id: int, db: Session = Depends(get_db)):
@@ -111,6 +115,73 @@ def source_status(source_id: int, db: Session = Depends(get_db)):
     return {"id": src.id, "status": src.status, "progress": PROGRESS.get(src.status, 0),
             "title": src.title, "triage_reason": src.triage_reason,
             "card_count": len(src.cards)}
+
+@app.get("/sources")
+def list_sources(status: str = "discarded,needs_text,failed", limit: int = 20,
+                 db: Session = Depends(get_db)):
+    statuses = [s.strip() for s in status.split(",") if s.strip()]
+    sources = db.scalars(select(Source).where(Source.status.in_(statuses))
+                         .order_by(Source.created_at.desc()).limit(limit)).all()
+    return [{"id": s.id, "url": s.url, "source_type": s.source_type, "title": s.title,
+             "status": s.status, "triage_reason": s.triage_reason} for s in sources]
+
+@app.post("/sources/{source_id}/rescue")
+def rescue(source_id: int, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    """Import a discarded item despite triage, or retry a failed one."""
+    src = db.get(Source, source_id)
+    if not src or src.status not in ("discarded", "failed"):
+        raise HTTPException(404, "No discarded/failed source with that id")
+    force_keep = src.status == "discarded"  # user overrides triage; failures just retry
+    src.status = "pending"
+    db.commit()
+    if src.source_type == "podcast":
+        from app.models import ListenProgress
+        from app.spotify_sync import process_podcast_source
+        episode_id = src.url.rstrip("/").rsplit("/", 1)[-1]
+        row = db.scalar(select(ListenProgress).where(ListenProgress.episode_id == episode_id))
+        if not row:
+            raise HTTPException(409, "No listening record for this episode")
+        background_tasks.add_task(process_podcast_source, src.id, app.state.session_factory,
+                                  app.state.llm, row.show_name, row.title)
+    else:
+        background_tasks.add_task(process_source, src.id, app.state.session_factory,
+                                  app.state.llm, app.state.fetcher, force_keep)
+    return {"id": src.id, "status": src.status}
+
+@app.post("/sources/{source_id}/text")
+def supply_text(source_id: int, req: SourceText, background_tasks: BackgroundTasks,
+                db: Session = Depends(get_db)):
+    """Manual paste for paywalled articles. Explicit user action, so triage can't discard it."""
+    src = db.get(Source, source_id)
+    if not src:
+        raise HTTPException(404, "No source with that id")
+    text = req.text.strip()
+    if len(text) < 100:
+        raise HTTPException(422, "That text looks too short to be the article")
+    src.content_text = text
+    src.status = "pending"
+    db.commit()
+    background_tasks.add_task(process_source, src.id, app.state.session_factory,
+                              app.state.llm, app.state.fetcher, True)
+    return {"id": src.id, "status": src.status}
+
+@app.get("/sites")
+def list_sites(db: Session = Depends(get_db)):
+    from app.models import SiteCookie
+    return [{"domain": s.domain, "updated_at": s.updated_at.isoformat()}
+            for s in db.scalars(select(SiteCookie)).all()]
+
+@app.put("/sites/{domain}")
+def set_site_cookies(domain: str, req: CookiesUpdate, db: Session = Depends(get_db)):
+    from app.models import SiteCookie
+    domain = domain.lower().removeprefix("www.")
+    row = db.get(SiteCookie, domain)
+    if row:
+        row.cookies = req.cookies
+    else:
+        db.add(SiteCookie(domain=domain, cookies=req.cookies))
+    db.commit()
+    return {"domain": domain, "saved": True}
 
 @app.get("/inbox")
 def inbox(db: Session = Depends(get_db)):

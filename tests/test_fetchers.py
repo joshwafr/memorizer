@@ -11,11 +11,13 @@ def test_fetch_youtube_joins_snippets():
 
 def test_fetch_article_uses_trafilatura():
     fetcher = ContentFetcher()
-    with patch("app.fetchers.trafilatura") as traf:
-        traf.fetch_url.return_value = "<html>raw</html>"
-        traf.extract.return_value = "Clean article text"
+    long_text = "Clean article text. " * 40  # above the paywall-stub threshold
+    with patch("app.fetchers.httpx.get",
+               return_value=MagicMock(status_code=200, text="<html>raw</html>")), \
+         patch("app.fetchers.trafilatura") as traf:
+        traf.extract.return_value = long_text
         text = fetcher.fetch("https://www.ft.com/content/x", "article")
-    assert text == "Clean article text"
+    assert text == long_text
 
 
 def test_youtube_uses_proxy_when_env_set(monkeypatch):

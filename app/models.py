@@ -66,3 +66,9 @@ class ListenProgress(Base):
     max_position_ms: Mapped[int] = mapped_column(default=0)
     consumed: Mapped[bool] = mapped_column(Boolean, default=False)
     updated_at: Mapped[datetime] = mapped_column(UTCDateTime(timezone=True), default=utcnow)
+
+class SiteCookie(Base):
+    __tablename__ = "site_cookies"
+    domain: Mapped[str] = mapped_column(String(200), primary_key=True)  # e.g. ft.com
+    cookies: Mapped[str] = mapped_column(Text)                          # raw Cookie header value
+    updated_at: Mapped[datetime] = mapped_column(UTCDateTime(timezone=True), default=utcnow)

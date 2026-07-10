@@ -106,6 +106,25 @@
       <button id="review-refresh" style="float:right">Refresh</button></h2>
   <div id="review-area"></div>
 </section>
+
+<section id="attention-section">
+  <h2>🚧 Filtered out / needs attention <span id="attention-count" class="muted"></span>
+      <button id="attention-refresh" style="float:right">Refresh</button></h2>
+  <p class="muted">Items triage discarded (rescue them if it was wrong — that also skips re-triage),
+     paywalled articles waiting for pasted text, and failures to retry.</p>
+  <div id="attention-list"></div>
+</section>
+
+<section id="profile-section">
+  <h2>🧭 Interest profile</h2>
+  <p class="muted">Triage keeps or discards every new import based on this text. Plain language,
+     edit freely — takes effect on the next capture.</p>
+  <textarea id="profile-text" rows="7"></textarea>
+  <div class="actions">
+    <button id="profile-save" class="primary">Save profile</button>
+    <span id="profile-status" class="muted"></span>
+  </div>
+</section>
 </div>
 
 <div id="view-cards" class="hidden">
@@ -194,11 +213,14 @@ function startProgress(sourceId) {
       status.innerHTML = `🗑 Filtered out as not relevant: <span class="muted">${esc(s.triage_reason || "")}</span>`;
     } else if (s.status === "failed") {
       status.innerHTML = `<span class="error">❌ Failed to process — hit Capture again to retry.</span>`;
+    } else if (s.status === "needs_text") {
+      status.innerHTML = `🔒 Paywalled — paste the article text in the section below.`;
     } else {
       status.textContent = `Finished with status: ${s.status}`;
     }
     setTimeout(() => { document.getElementById("progress-wrap").style.display = "none"; }, 1500);
     loadInbox();
+    loadAttention();
   }, 1500);
 }
 
@@ -302,6 +324,75 @@ async function submitAnswer(cardId) {
 }
 document.getElementById("review-refresh").onclick = loadReview;
 
+// --- Attention list: discarded / needs_text / failed ---
+async function loadAttention() {
+  const list = document.getElementById("attention-list");
+  const r = await api("/sources?status=discarded,needs_text,failed");
+  if (!r.ok) { list.innerHTML = '<p class="error">Failed to load.</p>'; return; }
+  const rows = await r.json();
+  document.getElementById("attention-count").textContent = rows.length ? `(${rows.length})` : "";
+  if (!rows.length) { list.innerHTML = '<p class="muted">Nothing needs attention.</p>'; return; }
+  list.innerHTML = rows.map(s => `
+    <div class="import" data-id="${s.id}">
+      <div class="import-head" style="cursor:default">
+        <span class="status-badge ${s.status === "discarded" ? "suspended" : "inactive"}">${esc(s.status.replace("_", " "))}</span>
+        <span class="import-title">${esc(s.title || s.url)}</span>
+      </div>
+      <div class="import-body" style="display:block">
+        <p class="muted">${esc(s.triage_reason || "")}</p>
+        ${s.status === "needs_text" ? `
+          <textarea class="paste-text" rows="5" placeholder="Paste the full article text here…"></textarea>
+          <div class="actions"><button data-att-action="paste" class="primary">Submit text</button></div>`
+        : `
+          <div class="actions"><button data-att-action="rescue" class="primary">
+            ${s.status === "discarded" ? "Rescue — import anyway" : "Retry"}</button></div>`}
+      </div>
+    </div>`).join("");
+}
+
+document.getElementById("attention-list").onclick = async (e) => {
+  const action = e.target.dataset.attAction;
+  if (!action) return;
+  const row = e.target.closest(".import");
+  const id = row.dataset.id;
+  e.target.disabled = true;
+  try {
+    let r;
+    if (action === "rescue") {
+      r = await api(`/sources/${id}/rescue`, { method: "POST" });
+    } else {
+      r = await api(`/sources/${id}/text`, { method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: row.querySelector(".paste-text").value }) });
+    }
+    if (!r.ok) {
+      const body = await readBody(r);
+      row.querySelector(".import-body").insertAdjacentHTML("beforeend",
+        `<p class="error">${esc(body.detail || JSON.stringify(body))}</p>`);
+      return;
+    }
+    startProgress(Number(id));   // reuse the capture progress bar for the reprocess
+    await loadAttention();
+  } finally {
+    e.target.disabled = false;
+  }
+};
+document.getElementById("attention-refresh").onclick = loadAttention;
+
+// --- Interest profile editor ---
+async function loadProfile() {
+  const r = await api("/profile");
+  if (r.ok) document.getElementById("profile-text").value = (await r.json()).text;
+}
+document.getElementById("profile-save").onclick = async () => {
+  const status = document.getElementById("profile-status");
+  const r = await api("/profile", { method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text: document.getElementById("profile-text").value }) });
+  status.textContent = r.ok ? `Saved (v${(await r.json()).version}) ✓` : "Save failed";
+  setTimeout(() => { status.textContent = ""; }, 3000);
+};
+
 // --- Menu tabs ---
 function showTab(name) {
   document.getElementById("view-home").classList.toggle("hidden", name !== "home");
@@ -403,6 +494,8 @@ document.getElementById("cards-refresh").onclick = loadCards;
 
 loadInbox();
 loadReview();
+loadAttention();
+loadProfile();
 </script>
 </body>
 </html>

@@ -12,6 +12,12 @@ class ProfileUpdate(BaseModel):
 class TTSRequest(BaseModel):
     text: str
 
+class SourceText(BaseModel):
+    text: str
+
+class CookiesUpdate(BaseModel):
+    cookies: str
+
 class CardUpdate(BaseModel):
     question: str | None = None
     answer: str | None = None
